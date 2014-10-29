@@ -6,10 +6,7 @@ class God
 	constructor: (@width, @height) ->
 
 	_contains: (arr, x, y) ->
-		for item in arr
-			if item.x is x and item.y is y then return true
-		
-		return false
+		arr.some (item, index, array) -> return item.x is x and item.y is y
 
 	_countAliveNeighbors: (allCells, neighbors) ->
 		matches = 0

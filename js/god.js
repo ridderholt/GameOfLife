@@ -10,14 +10,9 @@ God = (function() {
   }
 
   God.prototype._contains = function(arr, x, y) {
-    var item, _i, _len;
-    for (_i = 0, _len = arr.length; _i < _len; _i++) {
-      item = arr[_i];
-      if (item.x === x && item.y === y) {
-        return true;
-      }
-    }
-    return false;
+    return arr.some(function(item, index, array) {
+      return item.x === x && item.y === y;
+    });
   };
 
   God.prototype._countAliveNeighbors = function(allCells, neighbors) {
