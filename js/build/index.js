@@ -44,6 +44,7 @@ Game = (function() {
   Game.prototype.currentCells = [];
 
   Game.prototype.start = function() {
+    this.nextRound(this);
     return setInterval(this.nextRound, 300, this);
   };
 
@@ -78,29 +79,40 @@ God = (function() {
     this.height = height;
   }
 
+  God.prototype._buildDictionary = function(cells) {
+    var c, dict, _i, _len;
+    dict = [];
+    for (_i = 0, _len = cells.length; _i < _len; _i++) {
+      c = cells[_i];
+      if (dict[c.x] === null || dict[c.x] === void 0) {
+        dict[c.x] = [];
+      }
+      dict[c.x][c.y] = c.alive;
+    }
+    return dict;
+  };
+
   God.prototype._contains = function(arr, x, y) {
     return arr.some(function(item, index, array) {
       return item.x === x && item.y === y;
     });
   };
 
-  God.prototype._countAliveNeighbors = function(allCells, neighbors) {
-    var cell, matches, nCell, _i, _j, _len, _len1;
+  God.prototype._countAliveNeighbors = function(dictionary, neighbors) {
+    var matches, nCell, _i, _len;
     matches = 0;
     for (_i = 0, _len = neighbors.length; _i < _len; _i++) {
       nCell = neighbors[_i];
-      for (_j = 0, _len1 = allCells.length; _j < _len1; _j++) {
-        cell = allCells[_j];
-        if (cell.x === nCell.x && cell.y === nCell.y && cell.alive === true) {
-          matches += 1;
-        }
+      if (dictionary[nCell.x][nCell.y] === true) {
+        matches += 1;
       }
     }
     return matches;
   };
 
   God.prototype._getNeighborsCoordinates = function(x, y) {
-    return [
+    var cells, f;
+    cells = [
       {
         x: x + 10,
         y: y
@@ -127,6 +139,10 @@ God = (function() {
         y: y - 10
       }
     ];
+    f = function(c) {
+      return (c.x >= 0 && c.y >= 0) && (c.x <= 500 && c.y <= 500);
+    };
+    return cells.filter(f);
   };
 
   God.prototype._lifeOrDeath = function(cell, nNeighbors) {
@@ -146,22 +162,24 @@ God = (function() {
   };
 
   God.prototype._whatToDo = function(allCells, cell) {
-    var aliveNeighbors, nearCells;
+    var aliveNeighbors, dict, nearCells;
+    dict = this._buildDictionary(allCells);
     nearCells = this._getNeighborsCoordinates(cell.x, cell.y);
-    aliveNeighbors = this._countAliveNeighbors(allCells, nearCells);
+    aliveNeighbors = this._countAliveNeighbors(dict, nearCells);
     cell = this._lifeOrDeath(cell, aliveNeighbors);
     return cell;
   };
 
   God.prototype.decide = function(aliveCells) {
-    var aliveCell, allCells, cell, cellsToPlot, x, y, _i, _j, _k, _l, _len, _len1, _ref, _ref1;
+    var aliveCell, aliveDict, allCells, cell, cellsToPlot, x, y, _i, _j, _k, _l, _len, _len1, _ref, _ref1;
+    aliveDict = this._buildDictionary(aliveCells);
     allCells = [];
     cellsToPlot = [];
     for (x = _i = 0, _ref = this.width; 0 <= _ref ? _i <= _ref : _i >= _ref; x = 0 <= _ref ? ++_i : --_i) {
       if (x % 10 === 0) {
         for (y = _j = 0, _ref1 = this.height; 0 <= _ref1 ? _j <= _ref1 : _j >= _ref1; y = 0 <= _ref1 ? ++_j : --_j) {
           if (y % 10 === 0) {
-            if (this._contains(aliveCells, x, y) === false) {
+            if (aliveDict[x] === void 0 || aliveDict[x][y] === void 0) {
               allCells.push(new Cell(x, y, false));
             }
           }

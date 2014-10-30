@@ -12,6 +12,7 @@ class Game
 	currentCells: []
 
 	start: ->
+		@nextRound @
 		setInterval @nextRound, 300, @
 
 	nextRound: (self) ->
