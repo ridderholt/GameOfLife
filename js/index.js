@@ -20,6 +20,7 @@ Game = (function() {
   Game.prototype.currentCells = [];
 
   Game.prototype.start = function() {
+    this.nextRound(this);
     return setInterval(this.nextRound, 300, this);
   };
 

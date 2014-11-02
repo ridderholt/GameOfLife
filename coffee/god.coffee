@@ -5,23 +5,29 @@ Cell = require './Cell.js'
 class God
 	constructor: (@width, @height) ->
 
-	_contains: (arr, x, y) ->
-		for item in arr
-			if item.x is x and item.y is y then return true
-		
-		return false
+	_buildDictionary: (cells) ->
+		dict = []
+		for c in cells
+			if dict[c.x] is null or dict[c.x] is undefined 
+				dict[c.x] = []
+			dict[c.x][c.y] = c.alive
 
-	_countAliveNeighbors: (allCells, neighbors) ->
+		dict
+
+	_contains: (arr, x, y) ->
+		arr.some (item, index, array) -> return item.x is x and item.y is y
+
+	_countAliveNeighbors: (dictionary, neighbors) ->
 		matches = 0
+
 		for nCell in neighbors
-			for cell in allCells
-				if cell.x is nCell.x and cell.y is nCell.y and cell.alive is true
-					matches += 1
+			if dictionary[nCell.x][nCell.y] is true
+				matches += 1
 
 		matches
 
 	_getNeighborsCoordinates: (x, y) ->
-		[
+		cells =	[
 			{ x: x + 10, y: y },
 			{ x: x - 10, y: y },
 			{ x: x, y: y + 10 },
@@ -31,6 +37,9 @@ class God
 			{ x: x - 10, y: y + 10 },
 			{ x: x - 10, y: y - 10 }
 		]
+
+		f = (c) -> (c.x >= 0 and c.y >= 0) and (c.x <= 500 and c.y <= 500)
+		cells.filter (f)
 
 	_lifeOrDeath: (cell, nNeighbors) ->
 		if cell.alive is true and nNeighbors < 2
@@ -45,12 +54,14 @@ class God
 		cell
 
 	_whatToDo: (allCells, cell) ->
+		dict = @_buildDictionary allCells
 		nearCells = @_getNeighborsCoordinates cell.x, cell.y
-		aliveNeighbors = @_countAliveNeighbors allCells, nearCells
+		aliveNeighbors = @_countAliveNeighbors dict, nearCells
 		cell = @_lifeOrDeath cell, aliveNeighbors
 		cell
 
 	decide: (aliveCells) ->
+		aliveDict = @_buildDictionary aliveCells
 		allCells = []
 		cellsToPlot = []
 
@@ -58,7 +69,7 @@ class God
 			if x%10 is 0
 				for y in [0..@height]
 					if y%10 is 0
-						if @_contains(aliveCells, x, y) is false
+						if aliveDict[x] is undefined or aliveDict[x][y] is undefined
 							allCells.push new Cell(x, y, false)
 
 		for aliveCell in aliveCells
