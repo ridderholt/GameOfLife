@@ -44,12 +44,6 @@ God = (function() {
     return dict;
   };
 
-  God.prototype._contains = function(arr, x, y) {
-    return arr.some(function(item, index, array) {
-      return item.x === x && item.y === y;
-    });
-  };
-
   God.prototype._countAliveNeighbors = function(dictionary, neighbors) {
     var matches, nCell, _i, _len;
     matches = 0;

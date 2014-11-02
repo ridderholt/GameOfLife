@@ -14,9 +14,6 @@ class God
 
 		dict
 
-	_contains: (arr, x, y) ->
-		arr.some (item, index, array) -> return item.x is x and item.y is y
-
 	_countAliveNeighbors: (dictionary, neighbors) ->
 		matches = 0
 
